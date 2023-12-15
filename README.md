@@ -11,12 +11,13 @@ The table below shows the versions compatibility between this radio example and 
 
 | **SX126X_RF_API** | **EP_LIB** |
 |:---:|:---:|
+| [v1.1](https://github.com/sigfox-tech-radio/sigfox-ep-rf-api-semtech-sx126x/releases/tag/v1.0) | [>= v3.2](https://github.com/sigfox-tech-radio/sigfox-ep-lib/releases/tag/v3.2) |
 | [v1.0](https://github.com/sigfox-tech-radio/sigfox-ep-rf-api-semtech-sx126x/releases/tag/v1.0) | [>= v3.2](https://github.com/sigfox-tech-radio/sigfox-ep-lib/releases/tag/v3.2) |
 
 ## Architecture
 
 <p align="center">
-<img src="https://github.com/sigfox-tech-radio/sigfox-ep-rf-api-semtech-sx126x/wiki/images/sigfox_ep_rf_api_semtech_sx126x_architecture.drawio.png" width="600"/>
+<a href="https://app.diagrams.net/?lightbox=1#Uhttps%3A%2F%2Fraw.githubusercontent.com%2Fwiki%2Fsigfox-tech-radio%2Fsigfox-ep-rf-api-semtech-sx126x%2Fimages%2Fsigfox_ep_rf_api_semtech_sx126x_architecture.drawio.png"><img src="https://github.com/sigfox-tech-radio/sigfox-ep-rf-api-semtech-sx126x/wiki/images/sigfox_ep_rf_api_semtech_sx126x_architecture.drawio.png" width="600"/>
 </p>
 
 ## Compilation flags for optimization

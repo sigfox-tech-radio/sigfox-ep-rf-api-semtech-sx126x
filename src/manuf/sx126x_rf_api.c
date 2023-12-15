@@ -82,7 +82,7 @@ typedef struct {
 /*** SX126X RF API local global variables ***/
 
 #ifdef VERBOSE
-static const sfx_u8 SX126X_RF_API_VERSION[] = "v1.0";
+static const sfx_u8 SX126X_RF_API_VERSION[] = "v1.1";
 #endif
 
 static sx126x_ctx_t sx126x_ctx = {

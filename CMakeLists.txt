@@ -40,8 +40,7 @@ if (NOT TARGET sx126x_driver)
         GIT_PROGRESS TRUE
         GIT_SHALLOW TRUE
         GIT_REPOSITORY    https://github.com/Lora-net/sx126x_driver.git
-        GIT_TAG           v2.2.0
-        PATCH_COMMAND git apply ${CMAKE_CURRENT_LIST_DIR}/cmake/sx126x.patch
+        GIT_TAG           v2.3.2
     )
 else ()
     list(APPEND CHIP_RF_HEADERS_LIST "$<BUILD_INTERFACE:$<TARGET_PROPERTY:sx126x_driver,INTERFACE_INCLUDE_DIRECTORIES>>")

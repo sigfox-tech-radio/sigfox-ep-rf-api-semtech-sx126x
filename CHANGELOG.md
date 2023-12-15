@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.1](https://github.com/sigfox-tech-radio/sigfox-ep-rf-api-semtech-sx126x/releases/tag/v1.1) - 15 Dec 2023
+
+### General
+
+* Remove `sx126x.patch` file
+
+### Known limitations
+
+* **LBT** not implemented.
+
 ## [v1.0](https://github.com/sigfox-tech-radio/sigfox-ep-rf-api-semtech-sx126x/releases/tag/v1.0) - 04 Dec 2023
 
 ### General
