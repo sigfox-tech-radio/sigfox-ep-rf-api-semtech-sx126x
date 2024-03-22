@@ -60,7 +60,7 @@ SX126X_HW_API_status_t SX126X_HW_API_get_xosc_cfg(SX126X_HW_API_xosc_cfg_t *xosc
     RETURN();
 }
 
-SX126X_HW_API_status_t SX126X_HW_API_get_pa_pwr_cfg(SX126X_HW_API_pa_pwr_cfg_t *pa_pwr_cfg_t, sfx_u32 rf_freq_in_hz, sfx_s8 expected_output_pwr_in_dbm)
+SX126X_HW_API_status_t SX126X_HW_API_get_pa_pwr_cfg(SX126X_HW_API_pa_pwr_cfg_t *pa_pwr_cfg, sfx_u32 rf_freq_in_hz, sfx_s8 expected_output_pwr_in_dbm)
 {
     /*TODO To be implemented by the device manufacturer */
 #ifdef ERROR_CODES

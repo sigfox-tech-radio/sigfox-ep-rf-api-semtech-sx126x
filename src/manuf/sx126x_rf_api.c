@@ -82,7 +82,7 @@ typedef struct {
 /*** SX126X RF API local global variables ***/
 
 #ifdef VERBOSE
-static const sfx_u8 SX126X_RF_API_VERSION[] = "v1.1";
+static const sfx_u8 SX126X_RF_API_VERSION[] = "v1.2";
 #endif
 
 static sx126x_ctx_t sx126x_ctx = {
@@ -133,7 +133,7 @@ RF_API_status_t SX126X_RF_API_open(RF_API_config_t *rf_api_config) {
 #endif
 #ifdef ERROR_CODES
     sx126x_hw_api_status = SX126X_HW_API_open(&SX126X_irq);
-    SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+    SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
     SX126X_HW_API_open(&SX126X_irq);
 #endif
@@ -153,7 +153,7 @@ RF_API_status_t SX126X_RF_API_close(void) {
 #endif
 #ifdef ERROR_CODES
     sx126x_hw_api_status = SX126X_HW_API_close();
-    SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+    SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
     SX126X_HW_API_close();
 #endif
@@ -174,16 +174,16 @@ RF_API_status_t SX126X_RF_API_process(void) {
     sx126x_irq_mask_t sx126x_irq_mask;
 
     if (sx126x_ctx.irq_flag != 1)
-        EXIT_ERROR(SX126X_RF_API_ERROR_STATE);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_STATE);
     sx126x_ctx.irq_flag = 0;
 
     sx126x_status = sx126x_get_and_clear_irq_status( SFX_NULL, &sx126x_irq_mask );
     if (sx126x_status != SX126X_STATUS_OK)
-    	EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_IRQ);
+    	EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_IRQ);
     if (sx126x_irq_mask & SX126X_IRQ_TX_DONE) {
     #ifdef ERROR_CODES
     	sx126x_hw_api_status = SX126X_HW_API_tx_off();
-    	SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+    	SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
     #else
     	SX126X_HW_API_tx_off();
     #endif
@@ -196,7 +196,7 @@ RF_API_status_t SX126X_RF_API_process(void) {
     if (sx126x_irq_mask & SX126X_IRQ_RX_DONE) {
 #ifdef ERROR_CODES
         sx126x_hw_api_status = SX126X_HW_API_rx_off();
-        SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+        SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
         SX126X_HW_API_rx_off();
 #endif
@@ -231,28 +231,37 @@ RF_API_status_t SX126X_RF_API_wake_up(void) {
 
     sx126x_status = sx126x_reset(SFX_NULL);
     if ( sx126x_status != SX126X_STATUS_OK)
-        EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_RESET);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_RESET);
     sx126x_status = sx126x_wakeup(SFX_NULL);
     if ( sx126x_status != SX126X_STATUS_OK)
-        EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_WAKEUP);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_WAKEUP);
     sx126x_status = sx126x_init_retention_list(SFX_NULL);
     if ( sx126x_status != SX126X_STATUS_OK)
-        EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_RETENTION);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_RETENTION);
 #ifdef ERROR_CODES
     sx126x_hw_api_status = SX126X_HW_API_get_reg_mode(&reg_mode);
-    SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+    SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
     SX126X_HW_API_get_reg_mode(&reg_mode);
 #endif
-    sx126x_status = sx126x_set_reg_mode( SFX_NULL, reg_mode);
+    switch (reg_mode) {
+        case SX126X_HW_API_REG_MODE_LDO:
+            sx126x_status = sx126x_set_reg_mode( SFX_NULL, SX126X_REG_MODE_LDO);
+            break;
+        case SX126X_HW_API_REG_MODE_DCDC:
+            sx126x_status = sx126x_set_reg_mode( SFX_NULL, SX126X_REG_MODE_DCDC);
+            break;
+        default:
+            sx126x_status = SX126X_STATUS_UNKNOWN_VALUE;
+    }
     if ( sx126x_status != SX126X_STATUS_OK)
-        EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_REGMODE);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_REGMODE);
     sx126x_status = sx126x_set_dio2_as_rf_sw_ctrl(SFX_NULL, 0x01);
     if ( sx126x_status != SX126X_STATUS_OK)
-        EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_RF_SW_CTRL);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_RF_SW_CTRL);
 #ifdef ERROR_CODES
     sx126x_hw_api_status = SX126X_HW_API_get_xosc_cfg(&xosc_cfg);
-    SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+    SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
     SX126X_HW_API_get_xosc_cfg(&xosc_cfg);
 #endif
@@ -286,28 +295,28 @@ RF_API_status_t SX126X_RF_API_wake_up(void) {
     			sx126x_status = SX126X_STATUS_UNKNOWN_VALUE;
     	}
         if ( sx126x_status != SX126X_STATUS_OK)
-            EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_TCXO_CTRL);
+            EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_TCXO_CTRL);
         sx126x_status = sx126x_cal( SFX_NULL, SX126X_CAL_ALL );
         if ( sx126x_status != SX126X_STATUS_OK)
-            EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_CAL);
+            EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_CAL);
     }
     sx126x_status = sx126x_set_standby(SFX_NULL, SX126X_STANDBY_CFG_XOSC );
     if (sx126x_status != SX126X_STATUS_OK)
-    	EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_STBY);
+    	EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_STBY);
     sx126x_status = sx126x_set_dio_irq_params(SFX_NULL, SX126X_IRQ_ALL, SX126X_IRQ_TX_DONE | SX126X_IRQ_RX_DONE, SX126X_IRQ_NONE, SX126X_IRQ_NONE );
     if (sx126x_status != SX126X_STATUS_OK)
-    	EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_IRQ);
+    	EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_IRQ);
     sx126x_status = sx126x_clear_irq_status(SFX_NULL, SX126X_IRQ_ALL );
     if (sx126x_status != SX126X_STATUS_OK)
-    	EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_IRQ);
+    	EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_IRQ);
     sx126x_status = sx126x_get_device_errors(SFX_NULL, &errors_mask);
     if ( (sx126x_status != SX126X_STATUS_OK) || (errors_mask != 0))
-    	EXIT_ERROR(SX126X_RF_API_ERROR_CHIP);
+    	EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP);
     sx126x_ctx.irq_en = 1;
 
 #ifdef ERROR_CODES
     sx126x_hw_api_status = SX126X_HW_API_delayMs(150);
-    SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+    SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
     SX126X_HW_API_delayMs(150);
 #endif
@@ -325,7 +334,7 @@ RF_API_status_t SX126X_RF_API_sleep(void) {
 
     sx126x_status = sx126x_set_sleep(SFX_NULL, SX126X_SLEEP_CFG_COLD_START);
     if (sx126x_status != SX126X_STATUS_OK)
-    	EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_SLEEP);
+    	EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_SLEEP);
 
 errors:
     RETURN();
@@ -345,22 +354,22 @@ RF_API_status_t SX126X_RF_API_init(RF_API_radio_parameters_t *radio_parameters) 
 
     sx126x_status = sx126x_set_rf_freq(SFX_NULL, radio_parameters->frequency_hz);
     if (sx126x_status != SX126X_STATUS_OK)
-    	EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_FREQ);
+    	EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_FREQ);
     switch (radio_parameters->modulation) {
         case RF_API_MODULATION_DBPSK :
         	sx126x_status = sx126x_set_pkt_type(SFX_NULL, SX126X_PKT_TYPE_BPSK);
             if (sx126x_status != SX126X_STATUS_OK)
-            	EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_PKT);
+            	EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_PKT);
             sx126x_mod_params_bpsk.br_in_bps = radio_parameters->bit_rate_bps;
             sx126x_mod_params_bpsk.pulse_shape = SX126X_DBPSK_PULSE_SHAPE;
             sx126x_status = sx126x_set_bpsk_mod_params(SFX_NULL, &sx126x_mod_params_bpsk);
             if (sx126x_status != SX126X_STATUS_OK)
-            	EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_MOD);
+            	EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_MOD);
         	break;
         case RF_API_MODULATION_GFSK :
         	sx126x_status = sx126x_set_pkt_type(SFX_NULL, SX126X_PKT_TYPE_GFSK);
             if (sx126x_status != SX126X_STATUS_OK)
-            	EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_PKT);
+            	EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_PKT);
             sx126x_mod_params_gfsk.br_in_bps = radio_parameters->bit_rate_bps;
 #ifdef BIDIRECTIONAL
             sx126x_mod_params_gfsk.fdev_in_hz = radio_parameters->deviation_hz;
@@ -369,7 +378,7 @@ RF_API_status_t SX126X_RF_API_init(RF_API_radio_parameters_t *radio_parameters) 
             sx126x_mod_params_gfsk.bw_dsb_param = SX126X_GFSK_BW_4800;
             sx126x_status = sx126x_set_gfsk_mod_params(SFX_NULL, &sx126x_mod_params_gfsk);
             if ( sx126x_status != SX126X_STATUS_OK)
-                EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_MOD);
+                EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_MOD);
         	break;
         case RF_API_MODULATION_NONE :
         	break;
@@ -380,26 +389,28 @@ RF_API_status_t SX126X_RF_API_init(RF_API_radio_parameters_t *radio_parameters) 
     	sx126x_ctx.backup_bit_rate_bps_patch = radio_parameters->bit_rate_bps;
 #ifdef ERROR_CODES
     	sx126x_hw_api_status = SX126X_HW_API_get_pa_pwr_cfg(&sx126x_hw_api_pa_pwr_cfg, radio_parameters->frequency_hz, radio_parameters->tx_power_dbm_eirp);
-        SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+        SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
     	SX126X_HW_API_get_pa_pwr_cfg(&sx126x_hw_api_pa_pwr_cfg, radio_parameters->frequency_hz, radio_parameters->tx_power_dbm_eirp);
 #endif
     	sx126x_pa_cfg_params.device_sel = sx126x_hw_api_pa_pwr_cfg.pa_config.device_sel;
-    	sx126x_pa_cfg_params.hp_max = sx126x_hw_api_pa_pwr_cfg.pa_config.device_sel;
+    	sx126x_pa_cfg_params.hp_max = sx126x_hw_api_pa_pwr_cfg.pa_config.hp_max;
     	sx126x_pa_cfg_params.pa_duty_cycle = sx126x_hw_api_pa_pwr_cfg.pa_config.pa_duty_cycle;
     	sx126x_pa_cfg_params.pa_lut = sx126x_hw_api_pa_pwr_cfg.pa_config.pa_lut;
         sx126x_status = sx126x_set_pa_cfg( SFX_NULL, &sx126x_pa_cfg_params);
         if ( sx126x_status != SX126X_STATUS_OK)
-            EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_PA);
+            EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_PA);
         sx126x_status = sx126x_set_tx_params( SFX_NULL, sx126x_hw_api_pa_pwr_cfg.power, SX126X_RAMP_40_US);
         if ( sx126x_status != SX126X_STATUS_OK)
-            EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_TX_CFG);
+            EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_TX_CFG);
     }
+#ifdef BIDIRECTIONAL
     if (radio_parameters->rf_mode == RF_API_MODE_RX) {
     	sx126x_status = sx126x_cfg_rx_boosted( SFX_NULL, 0x01);
         if ( sx126x_status != SX126X_STATUS_OK)
-            EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_RX);
+            EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_RX);
     }
+#endif
 errors:
     RETURN();
 }
@@ -414,13 +425,13 @@ RF_API_status_t SX126X_RF_API_de_init(void) {
 
 #ifdef ERROR_CODES
     sx126x_hw_api_status = SX126X_HW_API_rx_off();
-    SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+    SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
     SX126X_HW_API_rx_off();
 #endif
 #ifdef ERROR_CODES
     sx126x_hw_api_status = SX126X_HW_API_tx_off();
-    SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+    SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
     SX126X_HW_API_tx_off();
 #endif
@@ -463,20 +474,20 @@ RF_API_status_t SX126X_RF_API_send(RF_API_tx_data_t *tx_data) {
     }
     sx126x_status = sx126x_set_bpsk_pkt_params(SFX_NULL, &sx126x_pkt_params_bpsk);
     if ( sx126x_status != SX126X_STATUS_OK)
-        EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_PKT);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_PKT);
     sx126x_status = sx126x_write_buffer(SFX_NULL, 0, buffer, sx126x_pkt_params_bpsk.pld_len_in_bytes);
     if ( sx126x_status != SX126X_STATUS_OK)
-        EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_BUFFER);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_BUFFER);
 
 #ifdef ERROR_CODES
     sx126x_hw_api_status = SX126X_HW_API_tx_on();
-    SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+    SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
     SX126X_HW_API_tx_on();
 #endif
     sx126x_status = sx126x_set_tx( SFX_NULL, 5000);
     if ( sx126x_status != SX126X_STATUS_OK)
-        EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_TX);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_TX);
 #ifndef ASYNCHRONOUS
     while(sx126x_ctx.tx_done_flag != 1) {
         if (sx126x_ctx.irq_flag == 1) {
@@ -487,7 +498,7 @@ RF_API_status_t SX126X_RF_API_send(RF_API_tx_data_t *tx_data) {
             SX126X_RF_API_process();
 #endif
             if(sx126x_ctx.error_flag == 1) {
-                EXIT_ERROR(RF_API_ERROR);
+                EXIT_ERROR((RF_API_status_t) RF_API_ERROR);
             }
         }
     }
@@ -526,19 +537,19 @@ RF_API_status_t SX126X_RF_API_receive(RF_API_rx_data_t *rx_data) {
     sx126x_pkt_params_gfsk.sync_word_len_in_bits = SIGFOX_DL_FT_SIZE_BYTES * 8;
     sx126x_status = sx126x_set_gfsk_pkt_params(SFX_NULL, &sx126x_pkt_params_gfsk);
     if ( sx126x_status != SX126X_STATUS_OK)
-        EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_PKT);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_PKT);
     sx126x_status = sx126x_set_gfsk_sync_word(SFX_NULL, sync_world, 2);
     if ( sx126x_status != SX126X_STATUS_OK)
-        EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_SYNC);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_SYNC);
 #ifdef ERROR_CODES
     sx126x_hw_api_status = SX126X_HW_API_rx_on();
-    SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+    SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
     SX126X_HW_API_rx_on();
 #endif
     sx126x_status = sx126x_set_rx_with_timeout_in_rtc_step(SFX_NULL, 0xFFFFFF);
     if ( sx126x_status != SX126X_STATUS_OK)
-        EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_RX);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_RX);
 #ifndef ASYNCHRONOUS
     while(1) {
         if (sx126x_ctx.irq_flag == 1) {
@@ -549,7 +560,7 @@ RF_API_status_t SX126X_RF_API_receive(RF_API_rx_data_t *rx_data) {
             SX126X_RF_API_process();
 #endif
             if(sx126x_ctx.error_flag == 1) {
-                EXIT_ERROR(RF_API_ERROR);
+                EXIT_ERROR((RF_API_status_t) RF_API_ERROR);
             }
             if(sx126x_ctx.rx_done_flag == 1) {
                 rx_data->data_received = SFX_TRUE;
@@ -558,7 +569,7 @@ RF_API_status_t SX126X_RF_API_receive(RF_API_rx_data_t *rx_data) {
         }
 #ifdef ERROR_CODES
         mcu_api_status = MCU_API_timer_status(MCU_API_TIMER_INSTANCE_T_RX, &timer_has_elapsed);
-        MCU_API_check_status(SX126X_RF_API_ERROR_DRIVER_MCU_API);
+        MCU_API_check_status((RF_API_status_t)SX126X_RF_API_ERROR_DRIVER_MCU_API);
 #else
         MCU_API_timer_status(MCU_API_TIMER_INSTANCE_T_RX, &timer_has_elapsed);
 #endif
@@ -584,22 +595,22 @@ RF_API_status_t SX126X_RF_API_get_dl_phy_content_and_rssi(sfx_u8 *dl_phy_content
 #ifdef PARAMETERS_CHECK
     // Check parameters.
     if ((dl_phy_content == SFX_NULL) || (dl_rssi_dbm == SFX_NULL)) {
-        EXIT_ERROR(SX126X_RF_API_ERROR_NULL_PARAMETER);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_NULL_PARAMETER);
     }
     if (dl_phy_content_size > SIGFOX_DL_PHY_CONTENT_SIZE_BYTES) {
-        EXIT_ERROR(SX126X_RF_API_ERROR_BUFFER_SIZE);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_BUFFER_SIZE);
     }
 #endif
     if (sx126x_ctx.rx_done_flag != SFX_TRUE)
-            EXIT_ERROR(SX126X_RF_API_ERROR_STATE);
+            EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_STATE);
     sx126x_status = sx126x_get_gfsk_pkt_status(SFX_NULL, &sx126x_pkt_status_gfsk);
     if ( sx126x_status != SX126X_STATUS_OK)
-        EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_PKT);
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_PKT);
     if (sx126x_pkt_status_gfsk.rx_status.pkt_received == 1) {
         *dl_rssi_dbm = (sfx_s16)sx126x_pkt_status_gfsk.rssi_avg;
         sx126x_status = sx126x_get_rx_buffer_status(SFX_NULL, &sx126x_rx_buffer_status);
         if ( sx126x_status != SX126X_STATUS_OK)
-            EXIT_ERROR(SX126X_RF_API_ERROR_CHIP_BUFFER);
+            EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_BUFFER);
         sx126x_read_buffer(SFX_NULL,sx126x_rx_buffer_status.buffer_start_pointer, dl_phy_content,
                 dl_phy_content_size);
     }
@@ -633,14 +644,14 @@ RF_API_status_t SX126X_RF_API_get_latency(RF_API_latency_t latency_type, sfx_u32
             *latency_ms = 150;
 #ifdef ERROR_CODES
             sx126x_hw_api_status = SX126X_HW_API_get_latency(SX126X_HW_API_LATENCY_RESET, &latency_tmp);
-            SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+            SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
             SX126X_HW_API_get_latency(SX126X_HW_API_LATENCY_RESET, &latency_tmp);
 #endif
             (*latency_ms) += latency_tmp;
 #ifdef ERROR_CODES
             sx126x_hw_api_status = SX126X_HW_API_get_latency(SX126X_HW_API_LATENCY_WAKEUP, &latency_tmp);
-            SX126X_HW_API_check_status(SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
+            SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
             SX126X_HW_API_get_latency(SX126X_HW_API_LATENCY_RESET, &latency_tmp);
 #endif

@@ -181,18 +181,16 @@ SX126X_HW_API_status_t SX126X_HW_API_delayMs(unsigned short delay_ms);
 
 /*!******************************************************************
  * \fn SX126X_HW_API_status_t SX126X_HW_API_get_chip_name(SX126X_HW_API_chip_name_t *chipset);
- * \brief TODO
- * \param[in]  	TODO
- * \param[out] 	TODO
+ * \brief Get the chip name
+ * \param[out] 	chipset: pointer to chip name structure
  * \retval		Function execution status.
  *******************************************************************/
 SX126X_HW_API_status_t SX126X_HW_API_get_chip_name(SX126X_HW_API_chip_name_t *chipset);
 
 /*!******************************************************************
  * \fn SX126X_HW_API_status_t SX126X_HW_API_get_reg_mode(SX126X_HW_API_reg_mod_t *reg_mode);
- * \brief TODO
- * \param[in]  	TODO
- * \param[out] 	TODO
+ * \brief Get regulator mode configuration
+ * \param[out] 	reg_mode: pointer to regulator mode structure
  * \retval		Function execution status.
  *******************************************************************/
 SX126X_HW_API_status_t SX126X_HW_API_get_reg_mode(SX126X_HW_API_reg_mod_t *reg_mode);
@@ -200,21 +198,21 @@ SX126X_HW_API_status_t SX126X_HW_API_get_reg_mode(SX126X_HW_API_reg_mod_t *reg_m
 
 /*!******************************************************************
  * \fn SX126X_HW_API_status_t SX126X_HW_API_get_xosc_cfg(SX126X_HW_API_xosc_cfg_t *xosc_type);
- * \brief TODO
- * \param[in]  	TODO
- * \param[out] 	TODO
+ * \brief Get the XOSC configuration
+ * \param[out] 	xosc_cfg: pointer to oscillator structure
  * \retval		Function execution status.
  *******************************************************************/
 SX126X_HW_API_status_t SX126X_HW_API_get_xosc_cfg(SX126X_HW_API_xosc_cfg_t *xosc_cfg);
 
 /*!******************************************************************
  * \fn SX126X_HW_API_status_t SX126X_HW_API_get_pa_pwr_cfg(SX126X_HW_API_pa_pwr_cfg_t *pa_pwr_cfg_t, sfx_u32 rf_freq_in_hz, sfx_s8 expected_output_pwr_in_dbm);
- * \brief Get the SX126x PA power and configuration according to hardware matching. For more informations see SX126x datasheet (chapter 13.1.14 / 13.4.3) or contact Semtech.
- * \param[in]  	TODO
- * \param[out] 	TODO
+ * \brief Get the SX126x PA power and configuration according to hardware matching. For more informations see SX126x datasheet (chapter 13.1.14 / 13.4.4) or contact Semtech.
+ * \param[in]  	rf_freq_in_hz: RF frequency in Hz
+ * \param[in]  	expected_output_pwr_in_dbm: Expected output power in dBm
+ * \param[out] 	pa_pwr_cfg_t: Pointer to PA power configuration structure
  * \retval		Function execution status.
  *******************************************************************/
-SX126X_HW_API_status_t SX126X_HW_API_get_pa_pwr_cfg(SX126X_HW_API_pa_pwr_cfg_t *pa_pwr_cfg_t, sfx_u32 rf_freq_in_hz, sfx_s8 expected_output_pwr_in_dbm);
+SX126X_HW_API_status_t SX126X_HW_API_get_pa_pwr_cfg(SX126X_HW_API_pa_pwr_cfg_t *pa_pwr_cfg, sfx_u32 rf_freq_in_hz, sfx_s8 expected_output_pwr_in_dbm);
 
 
 /*!******************************************************************

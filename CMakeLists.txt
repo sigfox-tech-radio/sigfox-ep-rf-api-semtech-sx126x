@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(sx126x_rf_api)
 include(ExternalProject)
 
-#Check if Project configure by himself or by a parent project (like sfx_lib_core_protocol)
+#Check if Project configure by himself or by a parent project (like sigfox-ep-lib)
 if ( ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR} )
     if (NOT DEFINED  SIGFOX_EP_LIB_DIR)
         message(FATAL_ERROR "${PROJECT_NAME} cannot be configured without -DSIGFOX_EP_LIB_DIR=<sigfox_ep_lib directory>")
