@@ -82,7 +82,7 @@ typedef struct {
 /*** SX126X RF API local global variables ***/
 
 #ifdef VERBOSE
-static const sfx_u8 SX126X_RF_API_VERSION[] = "v1.2";
+static const sfx_u8 SX126X_RF_API_VERSION[] = "v1.3";
 #endif
 
 static sx126x_ctx_t sx126x_ctx = {
@@ -130,6 +130,8 @@ RF_API_status_t SX126X_RF_API_open(RF_API_config_t *rf_api_config) {
 #ifdef ASYNCHRONOUS
     sx126x_ctx.callbacks.process_cb = rf_api_config->process_cb;
     sx126x_ctx.callbacks.error_cb = rf_api_config->error_cb;
+#else
+    SFX_UNUSED(rf_api_config);
 #endif
 #ifdef ERROR_CODES
     sx126x_hw_api_status = SX126X_HW_API_open(&SX126X_irq);
@@ -193,6 +195,7 @@ RF_API_status_t SX126X_RF_API_process(void) {
             	sx126x_ctx.callbacks.tx_cplt_cb();
     #endif
     }
+#ifdef BIDIRECTIONAL
     if (sx126x_irq_mask & SX126X_IRQ_RX_DONE) {
 #ifdef ERROR_CODES
         sx126x_hw_api_status = SX126X_HW_API_rx_off();
@@ -201,11 +204,12 @@ RF_API_status_t SX126X_RF_API_process(void) {
         SX126X_HW_API_rx_off();
 #endif
         sx126x_ctx.rx_done_flag = 1;
-#if (defined ASYNCHRONOUS) && (defined BIDIRECTIONAL)
+#ifdef ASYNCHRONOUS
         if (sx126x_ctx.callbacks.rx_data_received_cb != SFX_NULL)
         	sx126x_ctx.callbacks.rx_data_received_cb();
 #endif
     }
+#endif
     RETURN();
 errors:
 #ifdef ASYNCHRONOUS
@@ -296,6 +300,9 @@ RF_API_status_t SX126X_RF_API_wake_up(void) {
     	}
         if ( sx126x_status != SX126X_STATUS_OK)
             EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_TCXO_CTRL);
+        sx126x_status = sx126x_clear_device_errors(SFX_NULL);
+        if (sx126x_status != SX126X_STATUS_OK)
+            EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP);
         sx126x_status = sx126x_cal( SFX_NULL, SX126X_CAL_ALL );
         if ( sx126x_status != SX126X_STATUS_OK)
             EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_CAL);
@@ -303,7 +310,14 @@ RF_API_status_t SX126X_RF_API_wake_up(void) {
     sx126x_status = sx126x_set_standby(SFX_NULL, SX126X_STANDBY_CFG_XOSC );
     if (sx126x_status != SX126X_STATUS_OK)
     	EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_STBY);
+    sx126x_status = sx126x_set_rx_tx_fallback_mode(SFX_NULL, SX126X_FALLBACK_STDBY_XOSC);
+    if (sx126x_status != SX126X_STATUS_OK)
+        EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_STBY);
+#ifdef BIDIRECTIONAL
     sx126x_status = sx126x_set_dio_irq_params(SFX_NULL, SX126X_IRQ_ALL, SX126X_IRQ_TX_DONE | SX126X_IRQ_RX_DONE, SX126X_IRQ_NONE, SX126X_IRQ_NONE );
+#else
+    sx126x_status = sx126x_set_dio_irq_params(SFX_NULL, SX126X_IRQ_ALL, SX126X_IRQ_TX_DONE, SX126X_IRQ_NONE, SX126X_IRQ_NONE );
+#endif
     if (sx126x_status != SX126X_STATUS_OK)
     	EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_IRQ);
     sx126x_status = sx126x_clear_irq_status(SFX_NULL, SX126X_IRQ_ALL );
@@ -422,12 +436,13 @@ RF_API_status_t SX126X_RF_API_de_init(void) {
     SX126X_HW_API_status_t sx126x_hw_api_status = SX126X_HW_API_SUCCESS;
 #endif
     //sx126x_status_t sx126x_status;
-
+#ifdef BIDIRECTIONAL
 #ifdef ERROR_CODES
     sx126x_hw_api_status = SX126X_HW_API_rx_off();
     SX126X_HW_API_check_status((RF_API_status_t) SX126X_RF_API_ERROR_DRIVER_SX126X_HW_API);
 #else
     SX126X_HW_API_rx_off();
+#endif
 #endif
 #ifdef ERROR_CODES
     sx126x_hw_api_status = SX126X_HW_API_tx_off();
@@ -622,10 +637,11 @@ errors:
 #if (defined REGULATORY) && (defined SPECTRUM_ACCESS_LBT)
 /*******************************************************************/
 RF_API_status_t SX126X_RF_API_carrier_sense(RF_API_carrier_sense_parameters_t *carrier_sense_params) {
-    /* To be implemented by the device manufacturer */
 #ifdef ERROR_CODES
-    RF_API_status_t status = RF_API_SUCCESS;
+	RF_API_status_t status = RF_API_SUCCESS;
 #endif
+    /* To be implemented by the device manufacturer */
+    SFX_UNUSED(carrier_sense_params);
     RETURN();
 }
 #endif
@@ -637,7 +653,7 @@ RF_API_status_t SX126X_RF_API_get_latency(RF_API_latency_t latency_type, sfx_u32
     RF_API_status_t status = RF_API_SUCCESS;
     SX126X_HW_API_status_t sx126x_hw_api_status = SX126X_HW_API_SUCCESS;
 #endif
-    sfx_u32 latency_tmp;
+    sfx_u32 latency_tmp = 0;
 
     switch(latency_type) {
         case RF_API_LATENCY_WAKE_UP :
