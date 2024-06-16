@@ -566,7 +566,7 @@ RF_API_status_t SX126X_RF_API_receive(RF_API_rx_data_t *rx_data) {
     if ( sx126x_status != SX126X_STATUS_OK)
         EXIT_ERROR((RF_API_status_t) SX126X_RF_API_ERROR_CHIP_RX);
 #ifndef ASYNCHRONOUS
-    while(1) {
+    while(sx126x_ctx.rx_done_flag != 1) {
         if (sx126x_ctx.irq_flag == 1) {
 #ifdef ERROR_CODES
             status = SX126X_RF_API_process();
