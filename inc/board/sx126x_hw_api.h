@@ -33,19 +33,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  *******************************************************************/
- 
+
 #ifndef __SX126X_HW_H__
 #define __SX126X_HW_H__
 
-#ifdef USE_SIGFOX_EP_FLAGS_H
+#ifndef SIGFOX_EP_DISABLE_FLAGS_FILE
 #include "sigfox_ep_flags.h"
 #endif
 #include "sigfox_types.h"
+#include "manuf/rf_api.h"
 
 /*** SX126X HW API structures ***/
 
-
-#ifdef ERROR_CODES
+#ifdef SIGFOX_EP_ERROR_CODES
 /*!******************************************************************
  * \enum SX126X_HW_API_status_t
  * \brief SX126X HW driver error codes.
@@ -54,7 +54,7 @@ typedef enum {
     SX126X_HW_API_SUCCESS = 0,
     SX126X_HW_API_ERROR,
     // Additional custom error codes can be added here (up to sfx_u32).
-    // They will be logged in the library error stack if the ERROR_STACK flag is defined (SIGFOX_ERROR_SOURCE_HW base).
+    // They will be logged in the library error stack if the SIGFOX_EP_ERROR_STACK flag is defined (SIGFOX_ERROR_SOURCE_HW base).
     // Last index.
     SX126X_HW_API_ERROR_LAST
 } SX126X_HW_API_status_t;
@@ -64,42 +64,38 @@ typedef void SX126X_HW_API_status_t;
 
 /*!******************************************************************
  * \enum SX126X_HW_API_chip_name_t
- * \brief TODO
+ * \brief SX126X chip names.
  *******************************************************************/
-typedef enum
-{
-	SX126X_HW_API_CHIP_NAME_SX1261    = 0x00,
-	SX126X_HW_API_CHIP_NAME_SX1262    = 0x01,
-	SX126X_HW_API_CHIP_NAME_LAST,
+typedef enum {
+    SX126X_HW_API_CHIP_NAME_SX1261 = 0x00,
+    SX126X_HW_API_CHIP_NAME_SX1262 = 0x01,
+    SX126X_HW_API_CHIP_NAME_LAST,
 } SX126X_HW_API_chip_name_t;
 
 /*!******************************************************************
  * \enum SX126X_HW_API_reg_mod_t
  * \brief Sx126x regulator mode
  *******************************************************************/
-typedef enum
-{
-	SX126X_HW_API_REG_MODE_LDO  = 0x00,  // default
-	SX126X_HW_API_REG_MODE_DCDC = 0x01,
-	SX126X_HW_API_REG_MODE_LAST,
+typedef enum {
+    SX126X_HW_API_REG_MODE_LDO = 0x00, // default
+    SX126X_HW_API_REG_MODE_DCDC = 0x01,
+    SX126X_HW_API_REG_MODE_LAST,
 } SX126X_HW_API_reg_mod_t;
-
 
 /*!******************************************************************
  * \enum SX126X_HW_API_tcxo_ctrl_t
- * \brief TODO
+ * \brief SX126X TCXO control voltage levels.
  *******************************************************************/
-typedef enum
-{
-	SX126X_HW_API_TCXO_CTRL_1_6V = 0x00,
-	SX126X_HW_API_TCXO_CTRL_1_7V ,
-	SX126X_HW_API_TCXO_CTRL_1_8V ,
-	SX126X_HW_API_TCXO_CTRL_2_2V ,
-	SX126X_HW_API_TCXO_CTRL_2_4V ,
-	SX126X_HW_API_TCXO_CTRL_2_7V ,
-	SX126X_HW_API_TCXO_CTRL_3_0V ,
-	SX126X_HW_API_TCXO_CTRL_3_3V ,
-	SX126X_HW_API_TCXO_CTRL_LAST,
+typedef enum {
+    SX126X_HW_API_TCXO_CTRL_1_6V = 0x00,
+    SX126X_HW_API_TCXO_CTRL_1_7V,
+    SX126X_HW_API_TCXO_CTRL_1_8V,
+    SX126X_HW_API_TCXO_CTRL_2_2V,
+    SX126X_HW_API_TCXO_CTRL_2_4V,
+    SX126X_HW_API_TCXO_CTRL_2_7V,
+    SX126X_HW_API_TCXO_CTRL_3_0V,
+    SX126X_HW_API_TCXO_CTRL_3_3V,
+    SX126X_HW_API_TCXO_CTRL_LAST,
 } SX126X_HW_API_tcxo_ctrl_t;
 
 /*!******************************************************************
@@ -107,32 +103,32 @@ typedef enum
  * \brief SX126X oscillator configuration.
  *******************************************************************/
 typedef struct {
-	sfx_u8  tcxo_is_radio_controlled;
-	SX126X_HW_API_tcxo_ctrl_t supply_voltage;
-	sfx_u32 startup_time_in_tick;
+    sfx_u8 tcxo_is_radio_controlled;
+    SX126X_HW_API_tcxo_ctrl_t supply_voltage;
+    sfx_u32 startup_time_in_tick;
 } SX126X_HW_API_xosc_cfg_t;
 
 /*!******************************************************************
  * \enum SX126X_HW_API_pa_pwr_cfg_t
- * \brief TODO
+ * \brief SX126X PA configuration parameters.
  *******************************************************************/
 typedef struct {
-	sfx_u8 pa_duty_cycle;
-	sfx_u8 hp_max;
-	sfx_u8 device_sel;
-	sfx_u8 pa_lut;
+    sfx_u8 pa_duty_cycle;
+    sfx_u8 hp_max;
+    sfx_u8 device_sel;
+    sfx_u8 pa_lut;
 } SX126X_HW_API_pa_cfg_params_t;
 
 /*!******************************************************************
  * \enum SX126X_HW_API_pa_pwr_cfg_t
- * \brief TODO
+ * \brief SX126X PA power configuration.
  *******************************************************************/
 typedef struct {
-	sfx_s8 power;
-	SX126X_HW_API_pa_cfg_params_t pa_config;
-}SX126X_HW_API_pa_pwr_cfg_t;
+    sfx_s8 power;
+    SX126X_HW_API_pa_cfg_params_t pa_config;
+} SX126X_HW_API_pa_pwr_cfg_t;
 
-#if (defined TIMER_REQUIRED) && (defined LATENCY_COMPENSATION)
+#if (defined SIGFOX_EP_TIMER_REQUIRED) && (defined SIGFOX_EP_LATENCY_COMPENSATION)
 /*!******************************************************************
  * \enum SX126X_HW_API_latency_t
  * \brief SX126X hardware functions latency delay type.
@@ -146,24 +142,37 @@ typedef enum {
 
 /********************************
  * \brief SX126X driver callback functions.
- * \fn SX126X_HW_irq_cb_t To be called when a rising edge is detected on the DIO9 pin.
+ * \fn SX126X_HW_API_irq_cb_t To be called when a rising edge is detected on the DIO1 pin.
  *******************************/
-typedef void (SX126X_HW_irq_cb_t)(void);
+typedef void (*SX126X_HW_API_irq_cb_t)(void);
+
+/*!******************************************************************
+ * \struct SX126X_HW_API_config_t
+ * \brief SX126X driver configuration structure.
+ *******************************************************************/
+typedef struct {
+    const SIGFOX_rc_t *rc;
+    SX126X_HW_API_irq_cb_t gpio_irq_callback;
+} SX126X_HW_API_config_t;
 
 /*** SX126X HW API functions ***/
 
 /*!******************************************************************
- * \fn SX126X_HW_API_status_t SX126X_HW_API_open(SX126X_HW_irq_cb_t SX126X_HW_irq_cb_t);
- * \brief Open the SX126X hardware interface. This function is called during RF_API_open() function of the manufacturer layer.
+ * \fn SX126X_HW_API_status_t SX126X_HW_API_open(SX126X_HW_API_config_t hw_api_config);
+ * \brief This function is called during the RF_API_open() function to open the SX126X hardware interface. It should:
+ * \brief   - configure all hardware pin of LR11XX chipset.
+ * \brief   - configure SPI peripherial.
+ * \brief   - configure the DIO1 SX126X pin as IRQ input: a rising edge on this pin must call the gpio_irq_callback function passed as parameter.
  * \param[in]  	SX126X_HW_irq_cb_t: GPIO interrupt callback that must be called on SX126X GPIOx pin interrupt.
  * \param[out] 	none
  * \retval		Function execution status.
  *******************************************************************/
-SX126X_HW_API_status_t SX126X_HW_API_open(SX126X_HW_irq_cb_t callback);
+SX126X_HW_API_status_t SX126X_HW_API_open(SX126X_HW_API_config_t *hw_api_config);
 
 /*!******************************************************************
  * \fn SX126X_HW_API_status_t SX126X_HW_API_close(void)
- * \brief Close the SX126X hardware interface. This function is called during RF_API_close() function of the manufacturer layer.
+ * \brief This function is called during the RF_API_close() function to close the SX126X hardware interface.
+ * \brief It should: Release all pins and peripherial opened.
  * \param[in]  	none
  * \param[out] 	none
  * \retval		Function execution status.
@@ -195,7 +204,6 @@ SX126X_HW_API_status_t SX126X_HW_API_get_chip_name(SX126X_HW_API_chip_name_t *ch
  *******************************************************************/
 SX126X_HW_API_status_t SX126X_HW_API_get_reg_mode(SX126X_HW_API_reg_mod_t *reg_mode);
 
-
 /*!******************************************************************
  * \fn SX126X_HW_API_status_t SX126X_HW_API_get_xosc_cfg(SX126X_HW_API_xosc_cfg_t *xosc_type);
  * \brief Get the XOSC configuration
@@ -213,7 +221,6 @@ SX126X_HW_API_status_t SX126X_HW_API_get_xosc_cfg(SX126X_HW_API_xosc_cfg_t *xosc
  * \retval		Function execution status.
  *******************************************************************/
 SX126X_HW_API_status_t SX126X_HW_API_get_pa_pwr_cfg(SX126X_HW_API_pa_pwr_cfg_t *pa_pwr_cfg, sfx_u32 rf_freq_in_hz, sfx_s8 expected_output_pwr_in_dbm);
-
 
 /*!******************************************************************
  * \fn SX126X_HW_API_status_t SX126X_HW_API_tx_on(void);
@@ -233,7 +240,7 @@ SX126X_HW_API_status_t SX126X_HW_API_tx_on(void);
  *******************************************************************/
 SX126X_HW_API_status_t SX126X_HW_API_tx_off(void);
 
-#ifdef BIDIRECTIONAL
+#ifdef SIGFOX_EP_BIDIRECTIONAL
 /*!******************************************************************
  * \fn SX126X_HW_API_status_t SX126X_HW_API_rx_on(void);
  * \brief Radio chipset will be start the RX.
@@ -244,7 +251,7 @@ SX126X_HW_API_status_t SX126X_HW_API_tx_off(void);
 SX126X_HW_API_status_t SX126X_HW_API_rx_on(void);
 #endif
 
-#ifdef BIDIRECTIONAL
+#ifdef SIGFOX_EP_BIDIRECTIONAL
 /*!******************************************************************
  * \fn SX126X_HW_API_status_t SX126X_HW_API_rx_off(void);
  * \brief Radio chipset just stopped the RX.
@@ -255,7 +262,7 @@ SX126X_HW_API_status_t SX126X_HW_API_rx_on(void);
 SX126X_HW_API_status_t SX126X_HW_API_rx_off(void);
 #endif
 
-#if (defined TIMER_REQUIRED) && (defined LATENCY_COMPENSATION)
+#if (defined SIGFOX_EP_TIMER_REQUIRED) && (defined SIGFOX_EP_LATENCY_COMPENSATION)
 /*!******************************************************************
  * \fn SX126X_HW_API_status_t SX126X_HW_API_get_latency(SX126X_HW_API_latency_t latency_type, sfx_u32 *latency_ms)
  * \brief Read HW functions latency in milliseconds.
@@ -266,7 +273,7 @@ SX126X_HW_API_status_t SX126X_HW_API_rx_off(void);
 SX126X_HW_API_status_t SX126X_HW_API_get_latency(SX126X_HW_API_latency_t latency_type, sfx_u32 *latency_ms);
 #endif
 
-#ifdef ERROR_CODES
+#ifdef SIGFOX_EP_ERROR_CODES
 /*!******************************************************************
  * \fn void SX126X_HW_API_stack_error(void)
  * \brief Generic macro which calls the error stack function for SX126X_HW_API errors (if enabled).
@@ -274,14 +281,14 @@ SX126X_HW_API_status_t SX126X_HW_API_get_latency(SX126X_HW_API_latency_t latency
  * \param[out]  none
  * \retval      none
  *******************************************************************/
-#ifdef ERROR_STACK
+#ifdef SIGFOX_EP_ERROR_STACK
 #define SX126X_HW_API_stack_error(void) SIGFOX_ERROR_stack(SIGFOX_ERROR_SOURCE_HW_API, sx126x_hw_api_status)
 #else
 #define SX126X_HW_API_stack_error(void)
 #endif
 #endif
 
-#ifdef ERROR_CODES
+#ifdef SIGFOX_EP_ERROR_CODES
 /*!******************************************************************
  * \fn void SX126X_HW_API_check_status(error)
  * \brief Generic macro to check an SX126X_HW_API function status and exit.
@@ -289,7 +296,7 @@ SX126X_HW_API_status_t SX126X_HW_API_get_latency(SX126X_HW_API_latency_t latency
  * \param[out]  none
  * \retval      none
  *******************************************************************/
-#define SX126X_HW_API_check_status(error) { if (sx126x_hw_api_status != SX126X_HW_API_SUCCESS) { SX126X_HW_API_stack_error(); EXIT_ERROR(error) } }
+#define SX126X_HW_API_check_status(error) { if (sx126x_hw_api_status != SX126X_HW_API_SUCCESS) { SX126X_HW_API_stack_error(); SIGFOX_EXIT_ERROR(error) } }
 #endif
 
 #endif /* __SX126X_RF_API_H__ */
