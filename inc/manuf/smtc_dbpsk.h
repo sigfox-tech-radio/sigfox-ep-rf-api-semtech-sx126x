@@ -20,7 +20,7 @@ Buffer with input data
 * optionally be the same as data_in, but must have space
 * for bpsk_pld_len_in_bits + 2 bits)
 */
-void dbpsk_encode_buffer(const uint8_t* data_in, int bpsk_pld_len_in_bits, uint8_t* data_out);
+void dbpsk_encode_buffer(const uint8_t *data_in, int bpsk_pld_len_in_bits, uint8_t *data_out);
 
 /*!
 * \brief Given the length of a BPSK frame, in bits,
@@ -35,9 +35,8 @@ Space required
 * for DBPSK frame, after addition of start/stop bits
 * [bytes]
 */
-static inline int dbpsk_get_pld_len_in_bytes(int bpsk_pld_len_in_bits)
-{
-    return ( bpsk_pld_len_in_bits + 9 ) >> 3;
+static inline int dbpsk_get_pld_len_in_bytes(int bpsk_pld_len_in_bits) {
+    return (bpsk_pld_len_in_bits + 9) >> 3;
 }
 
 /*!
@@ -52,9 +51,8 @@ static inline int dbpsk_get_pld_len_in_bytes(int bpsk_pld_len_in_bits)
 Space required
 * for DBPSK frame, after addition of start/stop bits [bits]
 */
-static inline int dbpsk_get_pld_len_in_bits(int bpsk_pld_len_in_bits)
-{
-// Hold the last bit one extra bit-time
+static inline int dbpsk_get_pld_len_in_bits(int bpsk_pld_len_in_bits) {
+    // Hold the last bit one extra bit-time
     return bpsk_pld_len_in_bits + 2;
 }
 

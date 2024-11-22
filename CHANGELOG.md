@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.0](https://github.com/sigfox-tech-radio/sigfox-ep-rf-api-semtech-sx126x/releases/tag/v2.0) - 22 Nov 2024
+
+### Added
+
+* New **SX126X_RF_API_get_and_clear_irq_status** method to be compatible with stm32wlxx_hal_subghz (#5).
+
+### Changed
+
+* Upgrade to **sigfox-ep-lib v4.0**
+* Use sx126x_rf_api_obj target object to build sx126x_rf_api library.
+* Remove unifdef dependency in all cmake with linked target.
+* Add **SX126X_HW_API_config_t** structure in HW API open function with **radio configuration pointer** to manage multi-RC front-ends.
+* Call **sx126x_clear_device_errors** in any case (#6).
+* Add missing **"sigfox_types.h"** include file (#3).
+
+### Known limitations
+
+* **LBT** not implemented
+* **Modulated CW** not supported for type approval addon.
+
 ## [v1.3](https://github.com/sigfox-tech-radio/sigfox-ep-rf-api-semtech-sx126x/releases/tag/v1.3) - 30 May 2024
 
 ### Added
