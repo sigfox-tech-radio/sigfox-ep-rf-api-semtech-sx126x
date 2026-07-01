@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.1](https://github.com/sigfox-tech-radio/sigfox-ep-rf-api-semtech-sx126x/releases/tag/v2.1) - 01 Jul 2026
+
+### Fixed
+
+* Remove **extra warnings**.
+
+### Changed
+
+* Upgrade to **SX126x driver v2.5.0**.
+* Return **error by default** in weak functions template.
+
+### Known limitations
+
+* **LBT** not implemented
+* **Modulated CW** not supported for type approval addon.
+
 ## [v2.0](https://github.com/sigfox-tech-radio/sigfox-ep-rf-api-semtech-sx126x/releases/tag/v2.0) - 22 Nov 2024
 
 ### Added

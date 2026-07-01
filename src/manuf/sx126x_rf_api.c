@@ -42,6 +42,11 @@
 #include "manuf/mcu_api.h"
 #include "manuf/rf_api.h"
 #include "sx126x.h"
+// Hack to differentiate v2.5.0 from older versions.
+#include "sx126x_driver_version.h"
+#ifndef SX126X_DRIVER_VERSION_MAJOR
+#include "sx126x_bpsk.h"
+#endif
 // SX126X hardware driver.
 #include "board/sx126x_hw_api.h"
 
@@ -81,7 +86,7 @@ typedef struct {
 /*** SX126X RF API local global variables ***/
 
 #ifdef SIGFOX_EP_VERBOSE
-static const sfx_u8 SX126X_RF_API_VERSION[] = "v2.0";
+static const sfx_u8 SX126X_RF_API_VERSION[] = "v2.1";
 #endif
 
 static sx126x_ctx_t sx126x_ctx = {
@@ -169,7 +174,11 @@ errors:
 #endif
 
 /*******************************************************************/
+#ifdef SIGFOX_EP_ASYNCHRONOUS
 RF_API_status_t SX126X_RF_API_process(void) {
+#else
+static RF_API_status_t SX126X_RF_API_process(void) {
+#endif
 #ifdef SIGFOX_EP_ERROR_CODES
     RF_API_status_t status = RF_API_SUCCESS;
     SX126X_HW_API_status_t sx126x_hw_api_status = SX126X_HW_API_SUCCESS;
@@ -506,8 +515,8 @@ RF_API_status_t SX126X_RF_API_send(RF_API_tx_data_t *tx_data) {
     buffer[tx_data->bitstream_size_bytes] = 0x80;
     dbpsk_encode_buffer(buffer, tx_data->bitstream_size_bytes * 8 + 2, buffer);
     /*Set the BPSK packet param*/
-    sx126x_pkt_params_bpsk.pld_len_in_bits = dbpsk_get_pld_len_in_bits(tx_data->bitstream_size_bytes * 8);
-    sx126x_pkt_params_bpsk.pld_len_in_bytes = dbpsk_get_pld_len_in_bytes(tx_data->bitstream_size_bytes * 8);
+    sx126x_pkt_params_bpsk.pld_len_in_bits = (sfx_u16) dbpsk_get_pld_len_in_bits(tx_data->bitstream_size_bytes * 8);
+    sx126x_pkt_params_bpsk.pld_len_in_bytes = (sfx_u8) dbpsk_get_pld_len_in_bytes(tx_data->bitstream_size_bytes * 8);
     if (sx126x_ctx.backup_bit_rate_bps_patch == 100) {
         sx126x_pkt_params_bpsk.ramp_down_delay = SX126X_SIGFOX_DBPSK_RAMP_DOWN_TIME_100_BPS;
         sx126x_pkt_params_bpsk.ramp_up_delay = SX126X_SIGFOX_DBPSK_RAMP_UP_TIME_100_BPS;
